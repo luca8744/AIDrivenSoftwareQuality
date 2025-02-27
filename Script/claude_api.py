@@ -105,8 +105,8 @@ def analyze_code_with_claude(code, max_retries=5, wait_time=10):
         try:
             response = client.messages.create(
                 #model="claude-3-opus-20240229",
-                #model = "claude-3-haiku-20240307",
-                model = "claude-3-5-sonnet-20241022",
+                model = "claude-3-haiku-20240307",
+                #model = "claude-3-5-sonnet-20241022",
                 max_tokens=1024,
                 messages=[{"role": "user", "content": prompt}]
             )
@@ -168,9 +168,9 @@ cartella_destinazione = os.path.abspath(os.path.join(os.path.dirname(__file__), 
 os.makedirs(cartella_destinazione, exist_ok=True)
 
 valutazioni_df = pd.DataFrame(valutazioni_list, columns=["File", "Manutenibilità", "Leggibilità", "Performance", "Sicurezza", "Modularità", "FullPath"])
-valutazioni_df.to_csv(os.path.join(cartella_destinazione, "Valutazioni_claude-3-sonnet.csv"), index=False)
+valutazioni_df.to_csv(os.path.join(cartella_destinazione, "Valutazioni_claude-haiku_v3.csv"), index=False)
 
 issues_df = pd.DataFrame(issues_list, columns=["File", "Riga", "Tipo", "Severità", "Descrizione", "Suggerimento", "FullPath"])
-issues_df.to_csv(os.path.join(cartella_destinazione, "Issues_claude-3-sonnet.csv"), index=False)
+issues_df.to_csv(os.path.join(cartella_destinazione, "Issues_claude-haiku_v3.csv"), index=False)
 
 print("Analisi completata con Claude!")

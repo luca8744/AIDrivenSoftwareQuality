@@ -23,13 +23,21 @@ def remove_first_last_line(text):
     lines = text.strip().split("\n")  # Rimuove spazi e divide in righe
     return "\n".join(lines[1:-1]) if len(lines) > 2 else ""
 
+def is_valid_json(text):
+    try:
+        json.loads(text)
+        return True
+    except ValueError:
+        return False
 
 def parse_chatgpt_response(response):
     
-    res = remove_first_last_line(response)
-    #res = response
+    if is_valid_json(response):
+        res = response
+    else:
+        res = remove_first_last_line(response)
     
-    print(res)
+    #print(res)
 
     try:
         # Carica il JSON se è in formato stringa
@@ -127,9 +135,9 @@ def analyze_code(code, max_retries=5, wait_time=10):
     while attempt < max_retries:
         try:
             response = client.chat.completions.create(
-                #model="gpt-4o-mini",
+                model="gpt-4o-mini",
                 #model="gpt-3.5-turbo",
-                model="gpt-4o",
+                #model="gpt-4o",
                 #model = "gpt-4-turbo",
                 #model = "o1-mini",
                 messages=[{"role": "user", "content": prompt}]
@@ -172,8 +180,8 @@ def process_folder(folder_path):
                 print(strDebug)
                 
                 try:
-                    if fileCount > MAXFILE:
-                        break 
+                    #if fileCount > MAXFILE:
+                    #    break 
 
                     with open(file_path, "r") as f:
                         code = f.read()
@@ -210,11 +218,11 @@ os.makedirs(cartella_destinazione, exist_ok=True)
 
 # Crea i DataFrame e salva le tabelle in file CSV
 valutazioni_df = pd.DataFrame(valutazioni_list, columns=["File", "Manutenibilità", "Leggibilità", "Performance", "Sicurezza", "Modularità", "FullPath"])
-file_path = os.path.join(cartella_destinazione, "Valutazioni_gpt-4o_v3.csv")
+file_path = os.path.join(cartella_destinazione, "Valutazioni_gpt-4o-mini.csv")
 valutazioni_df.to_csv(file_path, index=False)
 
 issues_df = pd.DataFrame(issues_list, columns=["File", "Riga", "Tipo", "Severità", "Descrizione", "Suggerimento", "FullPath"])
-file_path = os.path.join(cartella_destinazione, "Issues_gpt-4o_v3.csv")
+file_path = os.path.join(cartella_destinazione, "Issues_gpt-4o-mini.csv")
 issues_df.to_csv(file_path, index=False)
 
 print("done!")

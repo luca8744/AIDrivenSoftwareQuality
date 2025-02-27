@@ -4,8 +4,11 @@ import time
 import pandas as pd
 from io import StringIO
 import json
-from transformers import pipeline
+from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 from huggingface_hub import login
+
+from transformers import AutoModelForCausalLM, AutoTokenizer
+from auto_gptq import AutoGPTQForCausalLM
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from Define import keys 
@@ -70,7 +73,7 @@ def parse_chatgpt_response(response):
         return [], []
         
         
-def analyze_code(code, max_retries=5, wait_time=10):
+def analyze_code(code, max_retries=5, wait_time=10, max_tokens=20000):
     """Analizza il codice con chatGpt e restituisce le valutazioni e le issues."""
 
     prompt = f"""
@@ -125,8 +128,12 @@ def analyze_code(code, max_retries=5, wait_time=10):
     attempt = 0
     while attempt < max_retries:
         try:
-            response = code_quality_model(prompt)    
-            response_text = response[0]["generated_text"]
+            #response = code_quality_model(prompt, max_new_tokens=max_tokens, do_sample=True)
+            inputs = tokenizer(prompt, return_tensors="pt").to("cuda")
+            response = model.generate(**inputs, max_new_tokens=2000000)
+            
+            response_text = response[0]['generated_text']
+
             valutazioni, issues = parse_chatgpt_response(response_text)
             
             if response:  # Check if response is valid
@@ -191,9 +198,14 @@ folder_path = SourceCode.PANDA_SLIM
 
 login(huggingface_token)
 
-# Caricare il modello di Hugging Face per l'analisi del codice
-code_quality_model = pipeline("text-generation", model="bigcode/starcoder", token=huggingface_token)
+#model_name = "bigcode/starcoder"
+#tokenizer = AutoTokenizer.from_pretrained(model_name, use_auth_token=True)
+#model = AutoModelForCausalLM.from_pretrained(model_name, use_auth_token=True)
+#code_quality_model = pipeline("text-generation", model=model, tokenizer=tokenizer)
 
+model_name = "TheBloke/StarCoder-GPTQ"
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+model = AutoGPTQForCausalLM.from_quantized(model_name, device="cuda")
 
 filesTot = conta_file(folder_path)
 valutazioni_list, issues_list = process_folder(folder_path)

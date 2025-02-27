@@ -15,7 +15,7 @@ def analyze_issue_reports(directory):
         rows=num_files, cols=3, 
         subplot_titles=["Numero Totale di Issue", "Distribuzione per Severità", "Distribuzione per Tipologia"],
         specs=[[{"type": "indicator"}, {"type": "pie"}, {"type": "pie"}] for _ in files],
-        vertical_spacing=0.10  # Reduce spacing for a better layout
+        vertical_spacing=0.05  # Reduce spacing for a better layout
     )
 
     for i, file in enumerate(files, start=1):
